@@ -18,3 +18,4 @@ View your app in AI Studio: https://ai.studio/apps/3a3b82eb-7526-4d37-8ad8-02055
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+# labombersleague
