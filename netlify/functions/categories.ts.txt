@@ -1,0 +1,16 @@
+import { Handler } from '@netlify/functions';
+
+const handler: Handler = async (event, context) => {
+  // Aquí pondrías la lógica que tenías en tu backend original
+  const categories = [
+    { id: 1, name: "General" },
+    { id: 2, name: "Web" }
+  ];
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(categories),
+  };
+};
+
+export { handler };
