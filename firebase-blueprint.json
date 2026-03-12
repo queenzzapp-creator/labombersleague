@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A firefighter user profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Display name of the firefighter" },
+        "avatarUrl": { "type": "string", "description": "URL to the user's avatar image" },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "User role" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["name"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A category for challenges",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the category" },
+        "description": { "type": "string", "description": "Description of the category" }
+      },
+      "required": ["name"]
+    },
+    "Challenge": {
+      "title": "Challenge",
+      "description": "A firefighter challenge or maneuver",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the challenge" },
+        "description": { "type": "string", "description": "Detailed description" },
+        "categoryId": { "type": "string", "description": "ID of the category it belongs to" },
+        "imageUrl": { "type": "string", "description": "Main image URL" },
+        "youtubeUrl": { "type": "string", "description": "Optional YouTube video URL" },
+        "scoringType": { "type": "string", "enum": ["TIME_ASC", "TIME_DESC", "COUNT_DESC"], "description": "How the score is calculated" }
+      },
+      "required": ["title", "categoryId"]
+    },
+    "ChallengeFile": {
+      "title": "Challenge File",
+      "description": "An attachment for a challenge",
+      "type": "object",
+      "properties": {
+        "filename": { "type": "string" },
+        "originalName": { "type": "string" },
+        "mimeType": { "type": "string" },
+        "downloadUrl": { "type": "string" }
+      },
+      "required": ["filename", "downloadUrl"]
+    },
+    "Result": {
+      "title": "Result",
+      "description": "A recorded result for a challenge",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userAvatar": { "type": "string" },
+        "challengeId": { "type": "string" },
+        "challengeTitle": { "type": "string" },
+        "timeMs": { "type": "integer" },
+        "score": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "challengeId", "timeMs"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/categories/{categoryId}": { "schema": "Category", "description": "Challenge categories" },
+    "/challenges/{challengeId}": { "schema": "Challenge", "description": "Maneuvers and challenges" },
+    "/challenges/{challengeId}/files/{fileId}": { "schema": "ChallengeFile", "description": "Attachments for challenges" },
+    "/results/{resultId}": { "schema": "Result", "description": "Recorded results for leaderboards" }
+  }
+}

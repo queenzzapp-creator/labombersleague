@@ -1,0 +1,111 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Fields:
+//   - name: string (required)
+//   - avatarUrl: string (optional)
+//
+// Collection: categories
+// Fields:
+//   - name: string (required)
+//   - description: string (optional)
+//
+// Collection: challenges
+// Fields:
+//   - title: string (required)
+//   - description: string (required)
+//   - categoryId: string (required)
+//   - imageUrl: string (optional)
+//   - youtubeUrl: string (optional)
+//   - scoringType: string (optional, enum: ['TIME_ASC', 'TIME_DESC', 'COUNT_DESC'])
+//
+// Collection: results
+// Fields:
+//   - userId: string (required)
+//   - userName: string (required)
+//   - userAvatar: string (optional)
+//   - challengeId: string (required)
+//   - challengeTitle: string (optional)
+//   - timeMs: int (required)
+//   - score: float (optional)
+//   - timestamp: timestamp (required)
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "queenzz.app@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['name']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() < 1000)) &&
+             (!('role' in data) || (data.role in ['admin', 'user'])) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             (!('description' in data) || (data.description is string && data.description.size() < 500));
+    }
+
+    function isValidChallenge(data) {
+      return data.keys().hasAll(['title', 'description', 'categoryId']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 2000 &&
+             data.categoryId is string &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000)) &&
+             (!('youtubeUrl' in data) || (data.youtubeUrl is string && data.youtubeUrl.size() < 1000)) &&
+             (!('scoringType' in data) || (data.scoringType in ['TIME_ASC', 'TIME_DESC', 'COUNT_DESC']));
+    }
+
+    function isValidResult(data) {
+      return data.keys().hasAll(['userId', 'challengeId', 'timeMs', 'timestamp']) &&
+             data.timeMs is int && data.timeMs >= 0 &&
+             data.timestamp is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    match /categories/{categoryId} {
+      allow read, write: if true;
+    }
+
+    match /challenges/{challengeId} {
+      allow read, write: if true;
+
+      match /files/{fileId} {
+        allow read, write: if true;
+      }
+    }
+
+    match /results/{resultId} {
+      allow read, write: if true;
+    }
+  }
+}
